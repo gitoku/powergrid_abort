@@ -13,7 +13,7 @@ if f_init=='y' || exist('define.mat','file')~=2   %'define.mat'‚ª‚È‚¯‚ê‚Î‹­§“I‚
     %% ƒOƒ‰ƒt‚Ì’è‹`###
     
     % ƒGƒbƒWW‡‚É‚Ä’è‹`
-    E = [1,4;2,3;3,4;3,5;3,7;3,9;4,9;4,15;6,8;7,8;7,10;7,12;8,9;8,12;9,14;11,12;12,13;15,16;15,17];
+    E = [1,2;1,3;3,4;];
     num_x = max( max(E) ); %x‚Ì—v‘f”
 
 
@@ -45,24 +45,12 @@ if f_init=='y' || exist('define.mat','file')~=2   %'define.mat'‚ª‚È‚¯‚ê‚Î‹­§“I‚
     %% x‚ÌŒˆ’è
     x = sym('x',[num_x 1]);
 
-    %ƒG[ƒWƒFƒ“ƒgí•Ê###
-    %1:‹Ÿ‹‹‰Æ[3:solar,4:wind]
-    %2:ù—v‰Æ[1:home,2:factory]
-    %3:‘—“d‰Æ
-    agt_type =      [1 2 3 3 1 2 3 3 3 1 2 3 1 1 3 1 2];
-    agt_sub_type =  [3 1 0 0 3 1 0 0 0 3 2 0 3 4 0 3 1];
-
 
 
     %%  G‚ÌŒˆ’è###
     G_hat_sym = sym('G_hat_sym',[num_x 1]);
     G_hat_sym = [
-        x(1)-x(2)-x(3)+x(4);
-        x(3)+x(5)-x(6)+x(7)+x(8)+x(9);
-        -x(7)+x(10)-x(11)+x(12);
-        -x(8)-x(12)+x(13);
-        -x(4)-x(9)+x(14)-x(15);
-        x(15)+x(16)-x(17)
+        x(1)+x(2)+x(3)+x(4);
         ];
     num_G = length(G_hat_sym)*2;
 
@@ -161,7 +149,7 @@ if f_init=='y' || exist('define.mat','file')~=2   %'define.mat'‚ª‚È‚¯‚ê‚Î‹­§“I‚
     end
 
     save('define','num_x','num_lambda','N','Lp','L_diag',...
-        'lambda_matrix','agt_type','agt_sub_type',...
+        'lambda_matrix',...
         'G_sym','Gmatrix_sym','Gm','G','dlGdxi','dlGdx_sym','lG_sym'...
         );
     clear all;
@@ -185,7 +173,7 @@ rng(44);    %ƒ‰ƒ“ƒ_ƒ€‚ÌƒV[ƒh’l
 
 %% ƒpƒ‰ƒ[ƒ^İ’è###
 A =1;
-B = .3;
+B = .1;
 gamma = .05;
 c = .1./L_diag;
 
@@ -198,14 +186,15 @@ stp_max = day*3+1;    %s(Àsstep”)‚ÌÅ‘å
 eps_x = .001;   %x[k]‚ÌXV‚Ì‘Å‚¿Ø‚èŠî€:dx[k]<eps_x
 eps_t = .001;    %ƒÆ[k]‚ÌXV‚Ì‘Å‚¿Ø‚èŠî€:[{max(ƒÆ[k])-min(ƒÆ[k])}/mean(ƒÆ[k])]<eps_t
 dx_max = 1000;    %x[k]‚ÌXV‚ÌŒvZ’†~dx
-kt_max = 3000;     %ƒÆ[k]‚ÌXV‚ÌŒvZ‘Å‚¿Ø‚èk
+kt_max = 150;     %ƒÆ[k]‚ÌXV‚ÌŒvZ‘Å‚¿Ø‚èk
 
 %ƒÆ‚Ì‡ˆÓ‚ÌŒo‰ßƒf[ƒ^—p###
 wtc_m = 2;      %ŠÄ‹‚·‚éƒÆi‚Ìi
 wtc_step = 2;   %ŠÄ‹‚·‚éƒÆi‚Ìs
 g = rand([num_x,1])*1;
 agt_A = rand([num_x,1])*5;
-agt_B = rand([num_x,1])*10;
+% agt_B = rand([num_x,1])*10;
+agt_B = [4 1 -2 -5];
 
 
 
@@ -370,6 +359,9 @@ clear f_run;
 
 
 
+
+
+
 %% Œ‹‰Ê‚Ì•\¦
 f_plot = input('plot?[y,n]','s');  %'y'‚ÅÀs
 if isempty(f_plot)
@@ -377,12 +369,27 @@ if isempty(f_plot)
 end
 if f_plot == 'y'
     load('define');
+    
+    
+    load('result_a');
+    
+    X2=X;
+    LAMBDA2=LAMBDA;
+    LAMBDA_s2 = LAMBDA_s;
+    THETA2 = THETA;
+    agt_A2 = agt_A;
+    agt_B2 = agt_B;
+    wtc_m2 = wtc_m;
+    wtc_step2 = wtc_step;
+    c2 = c;
+    X_min2 = X_min;
+    
     load('result');
 
     % ƒÆ‚Ì‡ˆÓ‚ÌŒo‰ß‚É‚Â‚¢‚Ä‚Ìƒf[ƒ^®Œ`
     k_max = floor((KT_END-1)/10)*10;  %ƒOƒ‰ƒt‰E’[‚ª10‚Ì”{”‚É‚È‚é‚æ‚¤‚Éƒf[ƒ^Ø‚èÌ‚Ä
-%     dec = k_max+100;
-dec=5000;
+    dec = k_max;
+% dec=500;
 %     k = 0:k_max;
 k=0:dec-1;
     theta = zeros([num_x dec+1]);
@@ -415,11 +422,15 @@ k=0:dec-1;
     % F,G‚Ì„ˆÚ‚É‚Â‚¢‚Ä‚Ìƒf[ƒ^ŒvZ
     FX = zeros([stp_max 1]);
     GX = zeros([num_lambda stp_max]);
+    FX2 = zeros([stp_max 1]);
+    GX2 = zeros([num_lambda stp_max]);
     for step = 1:stp_max
         % FX(step) = F(X(:,step));
         FX(step) = eF(X(:,step),agt_A,agt_B);
+        FX2(step) = eF(X2(:,step),agt_A,agt_B);
         for m=1:num_lambda
             GX(m,step) = G{m}(X(:,step));
+            GX2(m,step) = G{m}(X2(:,step));
         end
     end
     
@@ -449,11 +460,12 @@ k=0:dec-1;
     time_h = time_min./60;
 
     figure(1);
-    plot(time,X,'LineWidth',1.5);
+    plot(time,X,time,X2,'LineWidth',1.5);
     title('x');
     grid on;
     xlim([0 stp_max-1-ofs]);
     set(gca,'FontName','Times','FontSize',18,'LineWidth',1.5) ;
+    legend('x1','x2','x3','x4','x1 abort','x2 abort','x3 abort','x4 abort');
 
     figure(2);
     plot(time,LAMBDA_plot,'LineWidth',1.5);
@@ -463,59 +475,31 @@ k=0:dec-1;
     set(gca,'FontName','Times','FontSize',18,'LineWidth',1.5) ;
 
     figure(3);
-    plot(time,FX,'LineWidth',1.5);
+    plot(time,FX,time,FX2,'LineWidth',1.5);
     %title('F');
     grid on;
     xlim([0 stp_max-1-ofs]);
     set(gca,'FontName','Times','FontSize',18,'LineWidth',1.5) ;
+    legend('F','F abort');
 
     figure(4);
-    plot(time,GX,'LineWidth',1.5);
+    plot(time,GX,time,GX2,'LineWidth',1.5);
+    legend('G+','G-','G+ abort','G- abort');
     title('G');
     grid on;
     xlim([0 stp_max-1-ofs]);
     set(gca,'FontName','Times','FontSize',18,'LineWidth',1.5) ;
 
-
-    legend('1','2','3','4','5','6');
-    
-        figure(11);
-    plot(time_min,LAMBDA_min,'LineWidth',1.5);
-    title('ƒÉ');
-    grid on;
-    set(gca,'FontName','Times','FontSize',18,'LineWidth',1.5) ;
-    legend('1','2','3','4','5','6');
-    
-    
-    figure(6);
-     plot(time_min,X_min(1:6,:),'LineWidth',1.5);
-    title('x 1');
-    grid on;
-    set(gca,'FontName','Times','FontSize',18,'LineWidth',1.5) ;
-    legend('1+s','2-h','3=','4=','5+s','6-h');
-    
-     figure(8);
-     plot(time_min,X_min(7:11,:),'LineWidth',1.5);
-    title('x 2');
-    grid on;
-    set(gca,'FontName','Times','FontSize',18,'LineWidth',1.5) ;
-    legend('7=','8=','9=','10-f','11+f');
-    
-    figure(9);
-     plot(time_min,X_min(12:17,:),'LineWidth',1.5);
-    title('x 3');
-    grid on;
-    set(gca,'FontName','Times','FontSize',18,'LineWidth',1.5) ;
-    legend('12=','13+s','14+w','15=','16+s','17-h');
-    
-
        figure(10);
-    kh = k.*(2/dec);
-    plot(kh,theta,'LineWidth',1.5);
-    axis 'auto y';
-    hold on;
+    kh = zeros([numel(theta)/num_x 1]);
+    for i=0:numel(kh)-1
+        kh(i+1) = i;
+    end
+    plot(kh,theta,[20 20],[.1 .9],'LineWidth',1.5);
+    set(gca,'FontName','Times','FontSize',18,'LineWidth',1.5) ;
+%     axis 'auto y';
 %     plot(k,theta_s,'--','LineWidth',1.5);
-    hold off;
+
 
 
 end
